@@ -89,13 +89,17 @@ num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
 # Open video file
 video = cv2.VideoCapture(PATH_TO_VIDEO)
-counter = 0
 ret, frame = video.read()
 height, width, layers = frame.shape
+fps = video.get(cv2.CAP_PROP_FPS)
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-video_out = cv2.VideoWriter("out.mp4", fourcc, 24, (width,height), isColor=True) 
-while(video.isOpened()):
+video_out = cv2.VideoWriter("out.mp4", fourcc, fps, (width,height), isColor=True) 
 
+frameCount = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+counter = 0
+while(video.isOpened()):
+    print(f"frame {counter} of {frameCount}")
+    counter +=1
     # Acquire frame and expand frame dimensions to have shape: [1, None, None, 3]
     # i.e. a single-column array, where each item in the column has the pixel RGB value
     ret, frame = video.read()
