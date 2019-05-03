@@ -141,80 +141,57 @@ if __name__ == '__main__':
 
     # frameCount = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    # Define an initial bounding box
-
-    # bbox = getInitialBoundingBox(frame)
-    # print(bbox)
-
     # # Initialize tracker with first frame and bounding box
-    # ok = tracker.init(frame, bbox)
     initBB = None
     fps = None
+    xmin, xmax, ymin, ymax = getInitialBoundingBox(frame)
+    initBB = (xmin, ymin, xmax-xmin, ymax-ymin)
+    tracker.init(frame, initBB)
+    fps = FPS().start()
+
 
     while True:
         # Read a new frame
+        ok, frame = video.read()
         if not ok:
             break
 
-        # Start timer
-        # timer = cv2.getTickCount()
+        ok, bbox = tracker.update(frame)
 
-        # Update tracker
-        if initBB is not None:
-            ok, frame = video.read()
+        if ok:
+            # Tracking success
+            (x, y, w, h) = [int(v) for v in bbox]
+            p1 = (int(bbox[0]), int(bbox[1]))
+            p2 = (int(bbox[2]), int(bbox[3]))
+            path_color = (0,255,0)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), path_color, 2)
+            # Draw centroid
+            center_point_x = int(x+ 0.5*w)
+            center_point_y = int(y + 0.5*h)
+            center = (center_point_x,center_point_y)
+            cv2.circle(frame, center, 2, path_color, -1)
 
-            ok, bbox = tracker.update(frame)
 
-            # Draw bounding box
-            if ok:
-                # Tracking success
-                (x, y, w, h) = [int(v) for v in bbox]
-                p1 = (int(bbox[0]), int(bbox[1]))
-                p2 = (int(bbox[2]), int(bbox[3]))
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            else:
-                # Tracking failure
-                cv2.putText(frame, "Tracking failure detected", (100, 80),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
-            fps.update()
-            fps.stop()
-            info = [
-                ("Tracker", tracker_type),
-                ("Success", "Yes" if ok else "No"),
-                ("FPS", "{:.2f}".format(fps.fps())),
-            ]
+        else:
+            # Tracking failure
+            cv2.putText(frame, "Tracking failure detected", (100, 80),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
+        fps.update()
+        fps.stop()
+        info = [
+            ("Tracker", tracker_type),
+            ("Success", "Yes" if ok else "No"),
+            ("FPS", "{:.2f}".format(fps.fps())),
+        ]
 
-            # loop over the info tuples and draw them on our frame
-            for (i, (k, v)) in enumerate(info):
-                text = "{}: {}".format(k, v)
-                cv2.putText(frame, text, (10, im_height - ((i * 20) + 20)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        # loop over the info tuples and draw them on our frame
+        for (i, (k, v)) in enumerate(info):
+            text = "{}: {}".format(k, v)
+            cv2.putText(frame, text, (10, im_height - ((i * 20) + 20)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
-
-        # if the 's' key is selected, we are going to "select" a bounding
-        # box to track
-        if key == ord("s"):
-            # select the bounding box of the object we want to track (make
-            # sure you press ENTER or SPACE after selecting the ROI)
-            (xmin, xmax, ymin, ymax) = getInitialBoundingBox(frame)
-            initBB2 = [xmin, ymin, xmax-xmin, ymax-ymin]
-            initBB = cv2.selectROI(
-                "Frame", frame, fromCenter=False, showCrosshair=True)
-            print(initBB)
-            print(initBB2)
-
-            # start OpenCV object tracker using the supplied bounding box
-            # coordinates, then start the FPS throughput estimator as well
-            tracker.init(frame, initBB)
-            fps = FPS().start()
-            # Display result
-            # cv2.imshow("Tracking", frame)
-
-            # Exit if ESC pressed
-            k = cv2.waitKey(1) & 0xff
-            if k == 27: break
 
     # Clean up
     video.release()
