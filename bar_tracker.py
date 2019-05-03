@@ -19,7 +19,6 @@ def getInitialBoundingBox(frame):
     """
     # Name of the directory containing the object detection module we're using
     MODEL_NAME = 'inference_graph'
-    VIDEO_NAME = sys.argv[1]
 
     # Grab path to current working directory
     CWD_PATH = os.getcwd()
@@ -84,9 +83,10 @@ def getInitialBoundingBox(frame):
 
     # Draw the results of the detection (aka 'visulaize the results')
     xmin, xmax, ymin, ymax = np.squeeze(boxes)[0]
-
+    print(np.squeeze(boxes)[0])
     # Gotta multiply by image width and height to get pixels
     im_width, im_height, _  = frame.shape
+    print(frame.shape)
     xmin = int(xmin*im_width)
     xmax = int(xmax*im_width)
     ymin = int(ymin*im_height)
@@ -102,22 +102,22 @@ if __name__ == '__main__':
     ]
     tracker_type = tracker_types[2]
     # Bad
-    # if tracker_type == 'BOOSTING':
-    #     tracker = cv2.TrackerBoosting_create()
-    # if tracker_type == 'MIL':
-    #     tracker = cv2. TrackerMIL_create()
-    # if tracker_type == 'KCF':
-    #     tracker = cv2.TrackerKCF_create()
-    # if tracker_type == 'TLD':
-    #     tracker = cv2.TrackerTLD_create()
-    # if tracker_type == 'MEDIANFLOW':
-    #     tracker = cv2.TrackerMedianFlow_create()
-    # if tracker_type == 'GOTURN':
-    #     tracker = cv2.TrackerGOTURN_create()
-    # if tracker_type == 'MOSSE':
-    #     tracker = cv2.TrackerMOSSE_create()
-    # if tracker_type == "CSRT":
-    #     tracker = cv2.TrackerCSRT_create()
+    if tracker_type == 'BOOSTING':
+        tracker = cv2.TrackerBoosting_create()
+    if tracker_type == 'MIL':
+        tracker = cv2. TrackerMIL_create()
+    if tracker_type == 'KCF':
+        tracker = cv2.TrackerKCF_create()
+    if tracker_type == 'TLD':
+        tracker = cv2.TrackerTLD_create()
+    if tracker_type == 'MEDIANFLOW':
+        tracker = cv2.TrackerMedianFlow_create()
+    if tracker_type == 'GOTURN':
+        tracker = cv2.TrackerGOTURN_create()
+    if tracker_type == 'MOSSE':
+        tracker = cv2.TrackerMOSSE_create()
+    if tracker_type == "CSRT":
+        tracker = cv2.TrackerCSRT_create()
 
     # Read video
     try:
@@ -174,6 +174,7 @@ if __name__ == '__main__':
             # Tracking success
             p1 = (int(bbox[0]), int(bbox[1]))
             p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
+            
             cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
         else:
             # Tracking failure

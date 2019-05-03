@@ -11,6 +11,7 @@ High-level steps required:
     - This tutorial summarises: https://github.com/EdjeElectronics/TensorFlow-Object-Detection-API-Tutorial-Train-Multiple-Objects-Windows-10
     - https://medium.com/tensorflow/training-and-serving-a-realtime-mobile-object-detector-in-30-minutes-with-cloud-tpus-b78971cf1193
 - Track the centroid of the bounding box smoothly (Kalman filter to ensure smoothness?)
+  - CSRT Tracker in CV2?
 - Return an annotated video
 
 (Ideally once trained this could be incorporated into a website for general use)
