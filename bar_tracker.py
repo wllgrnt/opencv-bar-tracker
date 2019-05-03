@@ -9,7 +9,7 @@ import tensorflow as tf
 from utils import label_map_util
 from utils import visualization_utils as vis_util
 from imutils.video import FPS
-
+from collections import deque
 
 def getInitialBoundingBox(frame):
     """
@@ -134,12 +134,12 @@ if __name__ == '__main__':
         sys.exit()
 
     # Lets write the annotated file out as an mp4
-    # height, width, layers = frame.shape
-    # fps = video.get(cv2.CAP_PROP_FPS)
-    # fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    # video_out = cv2.VideoWriter("out.mp4", fourcc, fps, (width,height), isColor=True)
+    height, width, layers = frame.shape
+    fps = video.get(cv2.CAP_PROP_FPS)
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    video_out = cv2.VideoWriter("out.mp4", fourcc, fps, (width,height), isColor=True)
 
-    # frameCount = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    frameCount = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
     # # Initialize tracker with first frame and bounding box
     initBB = None
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     initBB = (xmin, ymin, xmax-xmin, ymax-ymin)
     tracker.init(frame, initBB)
     fps = FPS().start()
-
+    points = deque(maxlen=frameCount)
 
     while True:
         # Read a new frame
@@ -170,6 +170,11 @@ if __name__ == '__main__':
             center_point_y = int(y + 0.5*h)
             center = (center_point_x,center_point_y)
             cv2.circle(frame, center, 2, path_color, -1)
+            points.appendleft(center)
+            for i in range(1, len(points)):
+                if points[i-1] is None or points[i] is None:
+                    continue
+                cv2.line(frame, points[i-1], points[i], path_color,2)
 
 
         else:
@@ -191,6 +196,7 @@ if __name__ == '__main__':
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
         cv2.imshow("Frame", frame)
+        video_out.write(frame)
         key = cv2.waitKey(1) & 0xFF
 
     # Clean up
